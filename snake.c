@@ -12,6 +12,8 @@ typedef struct {
   int y;
 } SnakeNode;
 
+void print_at(int x, int y, char c) { printf("\033[%d;%dH%c", y, x, c); }
+
 void generate_board(int fruit[]) {
   system("cls");
   for (int i = 0; i < BOARD_HEIGHT; i++) {
@@ -29,8 +31,6 @@ void generate_board(int fruit[]) {
   }
 }
 
-void print_at(int x, int y, char c) { printf("\033[%d;%dH%c", y, x, c); }
-
 void draw_snake(SnakeNode *snake_head) {
   SnakeNode *current = snake_head;
   while (current != NULL) {
@@ -46,7 +46,7 @@ void move(SnakeNode *snake_head, char *direction, int *is_game_over) {
   int prev_x = current->x;
   int prev_y = current->y;
 
-  Sleep(1000);
+  Sleep(100);
   if (kbhit()) {
     char key = getch();
     switch (key) {
@@ -90,6 +90,7 @@ void move(SnakeNode *snake_head, char *direction, int *is_game_over) {
       break;
   }
 
+  print_at(prev_x, prev_y, ' ');
   current = current->next;
   while (current != NULL) {
     print_at(current->x, current->y, ' ');
@@ -103,38 +104,37 @@ void move(SnakeNode *snake_head, char *direction, int *is_game_over) {
   }
 }
 
-SnakeNode *add_node(int x, int y) {}
+SnakeNode *add_node(SnakeNode *snake_head, int x, int y) {
+  SnakeNode *current = snake_head;
+  SnakeNode *new = malloc(sizeof(SnakeNode));
+  if (new == NULL) {
+    perror("Error while allocating memory");
+  }
+  new->x = x;
+  new->y = y;
+  new->next = NULL;
+
+  while (current != NULL) {
+    if (current->next == NULL) {
+      current->next = new;
+      break;
+    }
+    current = current->next;
+  }
+}
 
 int main() {
   int score = 0;
   int is_game_over = 0;
-
   char direction = 's';
 
   SnakeNode *head = malloc(sizeof(SnakeNode));
-  SnakeNode *tail = malloc(sizeof(SnakeNode));
-  SnakeNode *tail2 = malloc(sizeof(SnakeNode));
-
   if (head == NULL) {
     perror("Error while allocating memory");
   }
-  if (tail == NULL) {
-    perror("Error while allocating memory");
-  }
-  if (tail2 == NULL) {
-    perror("Error while allocating memory");
-  }
-  head->next = tail;
-  head->x = 20;
-  head->y = 20;
-
-  tail->next = tail2;
-  tail->x = 21;
-  tail->y = 20;
-
-  tail2->next = NULL;
-  tail2->x = 22;
-  tail2->y = 20;
+  head->next = NULL;
+  head->x = 15;
+  head->y = 10;
 
   int fruit[2] = {rand() % (1 - BOARD_WIDTH) + 1,
                   rand() % (1 - BOARD_HEIGHT) + 1};
@@ -151,6 +151,7 @@ int main() {
     }
     if (head->x == fruit[0] && head->y == fruit[1]) {
       score += 10;
+      add_node(head, head->x, head->y);
       fruit[0] = rand() % (1 - BOARD_WIDTH) + 1;
       fruit[1] = rand() % (1 - BOARD_HEIGHT) + 1;
       draw_fruit(fruit);
