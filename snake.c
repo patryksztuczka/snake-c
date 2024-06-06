@@ -12,9 +12,8 @@ typedef struct {
   int y;
 } SnakeNode;
 
-void generate_board(SnakeNode *snake_head, int fruit[]) {
+void generate_board(int fruit[]) {
   system("cls");
-  SnakeNode *current = snake_head;
   for (int i = 0; i < BOARD_HEIGHT; i++) {
     for (int j = 0; j < BOARD_WIDTH; j++) {
       if (i == 0 || i == BOARD_HEIGHT - 1) {
@@ -22,11 +21,6 @@ void generate_board(SnakeNode *snake_head, int fruit[]) {
       } else if ((i > 0 && i < BOARD_HEIGHT) &&
                  (j == 0 || j == BOARD_WIDTH - 1)) {
         printf("#");
-      } else if (current != NULL && current->x == j && current->y == i) {
-        printf("0");
-        current = current->next;
-      } else if (fruit[0] == j && fruit[1] == i) {
-        printf("*");
       } else {
         printf(" ");
       }
@@ -34,6 +28,18 @@ void generate_board(SnakeNode *snake_head, int fruit[]) {
     printf("\n");
   }
 }
+
+void print_at(int x, int y, char c) { printf("\033[%d;%dH%c", y, x, c); }
+
+void draw_snake(SnakeNode *snake_head) {
+  SnakeNode *current = snake_head;
+  while (current != NULL) {
+    print_at(current->x, current->y, '0');
+    current = current->next;
+  }
+}
+
+void draw_fruit(int fruit[]) { print_at(fruit[0], fruit[1], '*'); }
 
 void move(SnakeNode *snake_head, char *direction, int *is_game_over) {
   SnakeNode *current = snake_head;
@@ -86,6 +92,7 @@ void move(SnakeNode *snake_head, char *direction, int *is_game_over) {
 
   current = current->next;
   while (current != NULL) {
+    print_at(current->x, current->y, ' ');
     int curr_x = current->x;
     int curr_y = current->y;
     current->x = prev_x;
@@ -132,9 +139,12 @@ int main() {
   int fruit[2] = {rand() % (1 - BOARD_WIDTH) + 1,
                   rand() % (1 - BOARD_HEIGHT) + 1};
 
+  generate_board(fruit);
+  draw_fruit(fruit);
+
   while (!is_game_over) {
-    generate_board(head, fruit);
     move(head, &direction, &is_game_over);
+    draw_snake(head);
     if (head->x == 0 || head->x == BOARD_WIDTH - 1 || head->y == 0 ||
         head->y == BOARD_HEIGHT - 1) {
       is_game_over = 1;
@@ -143,6 +153,7 @@ int main() {
       score += 10;
       fruit[0] = rand() % (1 - BOARD_WIDTH) + 1;
       fruit[1] = rand() % (1 - BOARD_HEIGHT) + 1;
+      draw_fruit(fruit);
     }
   }
 
