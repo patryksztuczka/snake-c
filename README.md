@@ -37,8 +37,8 @@ Follow these steps to set up the development environment:
 
 1. Clone the repository
   ```
-  git clone https://github.com/yourusername/terminal-snake.git
-  cd terminal-snake
+  git clone https://github.com/patryksztuczka/snake-c.git
+  cd snake-c
   ```
 2. Compile the game
   If you have Make installed, simply run:
